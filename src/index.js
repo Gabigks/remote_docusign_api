@@ -6,10 +6,12 @@ const dotenv = require("dotenv");
 const docusign = require("docusign-esign");
 const fs = require("fs-extra");
 const session = require("express-session");
+const authentication = require(".\\routes\\authentication"); 
 
 dotenv.config();
 
 const app = express();
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
   secret: "ll493843fb712",
@@ -17,8 +19,10 @@ app.use(session({
   saveUninitialized: true
 }));
 
+app.use(express.static('public'));
+
 app.post("/form", async (request, response) => {
-  await checkToken(request);
+  await authentication.checkToken(request);
   let envelopesApi = getEnvelopesApi(request);
   let templatesApi = getTemplatesApi(request);
 
@@ -110,15 +114,14 @@ function recipientTabs() {
   return tabs;
 };
 
-
 function templateDocument() {
   // read file
-  const docBytes = fs.readFileSync(path.join(__dirname, "template_doc_docusign_api2.docx"));
+  const docBytes = fs.readFileSync(path.join(__dirname, "..\\documents\\test.docx"));
   
   // create the document object
   const document = docusign.Document.constructFromObject({
     documentBase64: Buffer.from(docBytes).toString('base64'),
-    name: 'template_doc_docusign_api2.docx',
+    name: 'test.docx',
     fileExtension: 'docx',
     documentId: 1,
     order: 1,
@@ -167,28 +170,8 @@ function getTemplatesApi(request) {
   return new docusign.TemplatesApi(dsApiClient);
 }
 
-async function checkToken(request) {
-  if (request.session.access_token && Date.now() < request.session.expires_at) {
-    console.log("re-using acess_token", request.session.access_token);
-  } else {
-    console.log("generating new acess_token");
-    let dsApiClient = new docusign.ApiClient();
-    dsApiClient.setBasePath(process.env.BASE_PATH);
-    const results = await dsApiClient.requestJWTUserToken(
-      process.env.INTEGRATION_KEY,
-      process.env.USER_ID,
-      "signature",
-      fs.readFileSync(path.join(__dirname, "private_key")),
-      3600
-    );
-    console.log(results.body);
-    request.session.access_token = results.body.access_token;
-    request.session.expires_at = Date.now() + (results.body.expires_in - 60) * 1000
-  }
-}
-
 app.get("/", async (request, response) => {
-  await checkToken(request);
+  await authentication.checkToken(request);
   response.sendFile(path.join(__dirname, "main.html"));
 });
 
@@ -201,6 +184,12 @@ app.listen(8000, () => {
 })
 
 //https://account-d.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=c9e816b7-a3be-402e-89b0-edcc0f21b492&redirect_uri=http://localhost:8000/
+
+
+
+
+
+
 
 
 

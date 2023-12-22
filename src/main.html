@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Docusign Signature</title>
     <style>
         form input{
@@ -14,6 +15,7 @@
 </head>
 <body>
     <form action="/form" method="POST">
+        
         <label for="name">Nome:</label>
         <input id="name" name="name" type="text">
         <label for="email">Email:</label>
@@ -22,6 +24,17 @@
         <input id="company" name="company" type="text">
         <input type="submit">
     </form>
-    
+
+    <form id="meuFormulario">
+        <div id="dynamicFields">
+            <!-- Campos dinâmicos serão adicionados aqui -->
+        </div>
+        <button type="button" onclick="addField()">Adicionar Campo</button>
+        <button type="submit">Enviar</button>
+    </form>
+
+    <img src="/download.jpg">
+
+    <script src="script.js"></script>
 </body>
 </html>
