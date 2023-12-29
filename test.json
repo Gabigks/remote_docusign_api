@@ -1,0 +1,12 @@
+{
+  "name": "Gabrielllalsd",
+  "email": "gabriel.gksprof@gmail.com",
+  "company": "Desbravaa",
+  "signers": [
+    {
+      "roleName": "signer1",
+      "recipientId": 1,
+      "routingOrder": 1
+    }
+  ]   
+}

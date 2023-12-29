@@ -36,17 +36,21 @@ export const makeTemplate = (req) => {
     modifiedSigners.push(modifiedSigner);
   });
   
-  const signer = docusign.Signer.constructFromObject({
-    roleName: "signer",
-    recipientId: "1",
-    routingOrder: "1",
-  });
+  // const signer = docusign.Signer.constructFromObject({
+  //   roleName: "signer",
+  //   recipientId: "1",
+  //   routingOrder: "1",
+  // });
 
   const recipients = docusign.Recipients.constructFromObject({
     signers: modifiedSigners.map(signer => {
       return signer;
     }),
   });
+
+  console.log(modifiedSigners);
+  console.log(recipients);
+
   // create the envelope template model
   const templateRequest = docusign.EnvelopeTemplate.constructFromObject({
     name: "Example document generation template",
@@ -101,15 +105,15 @@ export const recipientTabs = () => {
 
 export const makeEnvelope = (name, email, templateId) => {
   // create the signer model
-  const signer = docusign.TemplateRole.constructFromObject({
+  const signer1 = docusign.TemplateRole.constructFromObject({
     email: email,
     name: name,
-    roleName: "signer",
+    roleName: "signer1",
   });
 
   // create the envelope model
   const envelopeDefinition = docusign.EnvelopeDefinition.constructFromObject({
-    templateRoles: [signer],
+    templateRoles: [signer1],
     status: "created",
     templateId: templateId,
   });
