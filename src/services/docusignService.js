@@ -25,7 +25,7 @@ export const makeTemplate = (req) => {
 
   const modifiedSigners = [];
   
-  let { signers } = req.body;
+  let { signers, envelopeTemp } = req.body;
 
   signers.forEach(signer => {
     const modifiedSigner = docusign.Signer.constructFromObject({
@@ -35,17 +35,11 @@ export const makeTemplate = (req) => {
     })
     modifiedSigners.push(modifiedSigner);
   });
-  
-  // const signer = docusign.Signer.constructFromObject({
-  //   roleName: "signer",
-  //   recipientId: "1",
-  //   routingOrder: "1",
-  // });
+
+  const signersArray = modifiedSigners.map(signer => signer);
 
   const recipients = docusign.Recipients.constructFromObject({
-    signers: modifiedSigners.map(signer => {
-      return signer;
-    }),
+    signers: signersArray
   });
 
   console.log(modifiedSigners);
@@ -53,19 +47,19 @@ export const makeTemplate = (req) => {
 
   // create the envelope template model
   const templateRequest = docusign.EnvelopeTemplate.constructFromObject({
-    name: "Example document generation template",
-    description: "Example template created via the API",
-    emailSubject: "Please sign this document",
-    shared: "false",
+    name: envelopeTemp.name,
+    description: envelopeTemp.desc,
+    emailSubject: envelopeTemp.emailSubject,
+    shared: envelopeTemp.shared,
     recipients: recipients,
     status: "created",
   });
   return templateRequest;
 }
 
-export const templateDocument = async () => {
+export const templateDocument = async (req) => {
   try {
-    const fileBuffer = await bufferHtml();
+    const fileBuffer = await bufferHtml(req);
 
     // Create the document objects
     const document = docusign.Document.constructFromObject({
@@ -74,7 +68,6 @@ export const templateDocument = async () => {
       fileExtension: 'docx',
       documentId: 1,
       order: 1,
-      pages: 1,
     });
 
     const envelopeDefinition = docusign.EnvelopeDefinition.constructFromObject({
@@ -88,9 +81,9 @@ export const templateDocument = async () => {
   }
 }
 
-export const recipientTabs = () => {
+export const recipientTabs = (anchor) => {
   const signHere = docusign.SignHere.constructFromObject({
-    anchorString: "Employee Signature",
+    anchorString: anchor,
     anchorUnits: "pixels",
     anchorXOffset: "5",
     anchorYOffset: "-22",
@@ -103,25 +96,50 @@ export const recipientTabs = () => {
   return tabs;
 };
 
-export const makeEnvelope = (name, email, templateId) => {
+export const makeEnvelope = (req, templateId) => {
   // create the signer model
-  const signer1 = docusign.TemplateRole.constructFromObject({
-    email: email,
-    name: name,
-    roleName: "signer1",
+  
+  let { signers } = req.body;
+  
+  const modifiedSigners = [];
+
+  signers.forEach(signer => {
+    const modifiedSigner = docusign.TemplateRole.constructFromObject({
+      email: signer.email,
+      name: signer.name,
+      roleName: signer.roleName,
+    })
+    modifiedSigners.push(modifiedSigner);
   });
+
+  console.log(modifiedSigners);
+  const templateRoles = modifiedSigners.map(modifiedSigner => modifiedSigner);
 
   // create the envelope model
   const envelopeDefinition = docusign.EnvelopeDefinition.constructFromObject({
-    templateRoles: [signer1],
+    templateRoles: templateRoles,
     status: "created",
     templateId: templateId,
   });
+
   return envelopeDefinition;
 };
 
+export const formFields = (documentId, req) => {
 
-export const formFields = (documentId, name, email, company) => {
+  let { signers } = req.body;
+  
+  const modifiedSigners = [];
+
+  signers.forEach(signer => {
+    const modifiedSigner = docusign.TemplateRole.constructFromObject({
+      email: signer.email,
+      name: signer.name,
+      roleName: signer.roleName,
+    })
+    modifiedSigners.push(modifiedSigner);
+  });
+
   const docGenFormFieldRequest =
     docusign.DocGenFormFieldRequest.constructFromObject({
       docGenFormFields: [
@@ -130,15 +148,15 @@ export const formFields = (documentId, name, email, company) => {
           docGenFormFieldList: [
             docusign.DocGenFormField.constructFromObject({
               name: "Candidate_Name",
-              value: name,
+              value: modifiedSigners[0].name,
             }),
             docusign.DocGenFormField.constructFromObject({
               name: "Email",
-              value: email,
+              value: modifiedSigners[0].email,
             }),
             docusign.DocGenFormField.constructFromObject({
               name: "Company_Name",
-              value: company,
+              value: modifiedSigners[0].company,
             }),
           ],
         }),
@@ -148,26 +166,8 @@ export const formFields = (documentId, name, email, company) => {
   return docGenFormFieldRequest;
 }
 
-const bufferHtml = async () => {
-  const htmlString = `<p>TESTE</p>
-  
-  <p>{{Candidate_Name}}</p>
- 
-  <p>{{Email}}</p>
-   
-  <p>{{Company_Name}}</p>
-   
-  <p>&nbsp;</p>
-   
-  <p>&nbsp;</p>
-   
-  <p>&nbsp;</p>
-   
-  <p>&nbsp;</p>
-   
-  <p>&nbsp;</p>
-   
-  <p>Employee Signature {{signHere}}</p>`;
+const bufferHtml = async (req) => {
+  const htmlString = req.body.html;
 
   const fileBuffer = await HTMLtoDOCX(htmlString, null, {
     table: { row: { cantSplit: true } },

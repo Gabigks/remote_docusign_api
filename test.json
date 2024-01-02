@@ -1,12 +1,29 @@
 {
-  "name": "Gabrielllalsd",
-  "email": "gabriel.gksprof@gmail.com",
-  "company": "Desbravaa",
+  "envelopeTemp": {
+      "name": "Example template doc",
+      "desc": "template doc created with remote docusign api",
+      "emailSubject": "Blablabla",
+      "shared": false
+    },
   "signers": [
     {
       "roleName": "signer1",
       "recipientId": 1,
-      "routingOrder": 1
+      "routingOrder": 1,
+      "name": "Gabrielll",
+      "email": "gabriel.gksprof@gmail.com",
+      "company": "Desbrava"
+    },
+    {
+      "roleName": "signer2",
+      "recipientId": 2,
+      "routingOrder": 1,
+      "name": "Junin",
+      "email": "V0dker00@gmail.com",
+      "company": "Ararangua"
     }
-  ]   
+  ],
+  "html": "<p>TESTE</p><p>{{Candidate_Name}}</p><p>{{Email}}</p><p>{{Company_Name}}</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>Employee Signature {{signHere}}</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>Junin Signature {{signHere}}</p>",
+  "anchorString": "Employee Signature",
+  "anchorString2": "Junin Signature"
 }
